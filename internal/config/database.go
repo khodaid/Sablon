@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/khodaid/Sablon/internal/models"
+	"github.com/khodaid/Sablon/internal/seeders"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -64,19 +65,19 @@ func (r *repository) RunMigrate() {
 	// fmt.Println("No command executed. Use --migrate for running migrations.")
 }
 
-// func (r *repository) RunSeed() {
-// 	seed := &Seed
+func (r *repository) RunSeed() {
+	seed := &Seed
 
-// 	if *seed {
-// 		seedList := seeders.ListSeeders()
+	if *seed {
+		seedList := seeders.ListSeeder()
 
-// 		for _, seeders := range seedList {
-// 			fmt.Print("Seeding......")
-// 			fmt.Println(seeders)
-// 			err := r.db.CreateInBatches(seeders, 100).Error
-// 			if err != nil {
-// 				fmt.Println(err)
-// 			}
-// 		}
-// 	}
-// }
+		for _, seeders := range seedList {
+			fmt.Print("Seeding......")
+			fmt.Println(seeders)
+			err := r.db.CreateInBatches(seeders, 100).Error
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+}

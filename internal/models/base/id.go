@@ -6,10 +6,12 @@ import (
 )
 
 type Id struct {
-	ID string `gorm:"char:(36);primary_key"`
+	ID string `gorm:"char:(36);primaryKey"`
 }
 
 func (base *Id) BeforeCreate(tx *gorm.DB) (err error) {
-	base.ID = uuid.New().String()
+	if base.ID == "" {
+		base.ID = uuid.New().String()
+	}
 	return nil
 }

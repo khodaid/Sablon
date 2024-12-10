@@ -37,10 +37,10 @@ func runCommand(g *repository) bool {
 		if Migrate {
 			g.RunMigrate()
 		}
-		// if Seed {
-		// 	fmt.Println("Run Seeder")
-		// 	g.RunSeed()
-		// }
+		if Seed {
+			fmt.Println("Run Seeder")
+			g.RunSeed()
+		}
 		return true
 	}
 	return false
