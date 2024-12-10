@@ -7,7 +7,10 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/khodaid/Sablon/internal/handler"
+	"github.com/khodaid/Sablon/internal/repositories"
 	"github.com/khodaid/Sablon/internal/route"
+	"github.com/khodaid/Sablon/internal/service"
 )
 
 // type RouteConfig struct {
@@ -79,7 +82,12 @@ func Run() {
 			return
 		}
 
-		r := route.InitRoute()
+		userRepository := repositories.NewUserRepository(g.db)
+		userService := service.NewUserService(userRepository)
+		userHandler := handler.NewUserHandler(userService)
+		routing := route.NewRoute(userHandler)
+
+		r := routing.InitRoute()
 		fmt.Println(app_config)
 		app_config.InitApp(r)
 	}

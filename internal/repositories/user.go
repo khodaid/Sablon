@@ -1,15 +1,20 @@
-package repository
+package repositories
 
 import (
 	"github.com/khodaid/Sablon/internal/models"
 	"gorm.io/gorm"
 )
 
+type Repository interface {
+	FindByEmail(string) (models.User, error)
+	// FindAll() []models.User
+}
+
 type repository struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) *repository {
+func NewUserRepository(db *gorm.DB) *repository {
 	return &repository{db}
 }
 
