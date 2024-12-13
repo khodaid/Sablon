@@ -32,10 +32,10 @@ func getEnv(key, fallback string) string {
 // 	return &RouteConfig{g}
 // }
 
-func runCommand(g *repository) bool {
+func runCommand(g *repository, db_conect string) bool {
 	if Migrate || Seed {
 		if Migrate {
-			g.RunMigrate()
+			g.RunMigrate(db_conect)
 		}
 		if Seed {
 			fmt.Println("Run Seeder")
@@ -60,6 +60,7 @@ func Run() {
 	app_config.APP_HOST = getEnv("APP_HOST", "localhost")
 	app_config.APP_PORT = getEnv("APP_PORT", "3636")
 
+	db_config.DB_CONNECTION = getEnv("DB_CONNECTION", "pgsql")
 	db_config.DB_HOST = getEnv("DB_HOST", "127.0.0.1")
 	db_config.DB_PORT = getEnv("DB_PORT", "3306")
 	db_config.DB_NAME = getEnv("DB_NAME", "khoda")
@@ -77,7 +78,7 @@ func Run() {
 			return
 		}
 
-		command := runCommand(g)
+		command := runCommand(g, db_config.DB_CONNECTION)
 		if command {
 			return
 		}
