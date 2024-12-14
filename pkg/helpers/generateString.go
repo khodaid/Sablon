@@ -1,4 +1,4 @@
-package utils
+package helpers
 
 import (
 	"math/rand"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func generateRandomString(length int) string {
+func GenerateRandomString(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	var builder strings.Builder
@@ -18,7 +18,7 @@ func generateRandomString(length int) string {
 	return builder.String()
 }
 
-func generateSupplierCode() string {
-	code := generateRandomString(8)
+func GenerateSupplierCode() string {
+	code := GenerateRandomString(8)
 	return code
 }
