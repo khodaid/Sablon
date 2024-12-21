@@ -86,7 +86,13 @@ func Run() {
 		userRepository := repositories.NewUserRepository(g.db)
 		userService := service.NewUserService(userRepository)
 		userHandler := handler.NewUserHandler(userService)
-		routing := route.NewRoute(userHandler)
+
+		supplierRepository := repositories.NewSupplierRepository(g.db)
+
+		storeRepository := repositories.NewStoreRepository(g.db)
+		storeService := service.NewStoreService(storeRepository, supplierRepository)
+		storehandler := handler.NewStoreHandler(g.db, storeService)
+		routing := route.NewRoute(userHandler, storehandler)
 
 		r := routing.InitRoute()
 		fmt.Println(app_config)

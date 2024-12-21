@@ -12,10 +12,10 @@ type UserHandler interface {
 }
 
 type userHandler struct {
-	userService service.Service
+	userService service.UserService
 }
 
-func NewUserHandler(userService service.Service) *userHandler {
+func NewUserHandler(userService service.UserService) *userHandler {
 	return &userHandler{userService}
 }
 

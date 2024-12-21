@@ -7,19 +7,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Service interface {
+type UserService interface {
 	Login(validation.Login) (models.User, error)
 }
 
-type service struct {
-	repository repositories.Repository
+type userService struct {
+	repository repositories.UserRepository
 }
 
-func NewUserService(repository repositories.Repository) *service {
-	return &service{repository}
+func NewUserService(repository repositories.UserRepository) *userService {
+	return &userService{repository}
 }
 
-func (s *service) Login(input validation.Login) (models.User, error) {
+func (s *userService) Login(input validation.Login) (models.User, error) {
 	email := input.Email
 	password := input.Password
 

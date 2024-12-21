@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Repository interface {
+type UserRepository interface {
 	FindByEmail(string) (models.User, error)
 	// FindAll() []models.User
 }

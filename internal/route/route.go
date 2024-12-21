@@ -12,11 +12,12 @@ type routeConfig struct {
 }
 
 type handlers struct {
-	userHandler handler.UserHandler
+	userHandler  handler.UserHandler
+	storeHandler handler.StoreHandler
 }
 
-func NewRoute(user handler.UserHandler) *handlers {
-	return &handlers{user}
+func NewRoute(user handler.UserHandler, store handler.StoreHandler) *handlers {
+	return &handlers{user, store}
 }
 
 func (h *handlers) InitRoute() *gin.Engine {
@@ -32,8 +33,10 @@ func (h *handlers) InitRoute() *gin.Engine {
 		})
 	})
 
-	userV1 := v1.Group("/user")
-	userV1.POST("/login", h.userHandler.Login)
+	v1.POST("/login", h.userHandler.Login)
+	v1.POST("/register", h.storeHandler.StoreRegister)
+
+	// userV1 := v1.Group("/user")
 
 	return c
 }
