@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+	"github.com/khodaid/Sablon/internal/dto"
 	"github.com/khodaid/Sablon/internal/service"
 	"github.com/khodaid/Sablon/internal/validation"
 	"github.com/khodaid/Sablon/pkg/helpers"
@@ -28,6 +29,13 @@ func NewStoreHandler(db *gorm.DB, storeService service.StoreService) *storeHandl
 func (h *storeHandler) StoreRegister(c *gin.Context) {
 	var storeInput validation.RegisterStoreInput
 	// var userStoreInput validation.RegisterUserStoreAdminInput
+
+	if err := c.ShouldBind(&storeInput); err != nil {
+		fmt.Println("Error binding data:", err)
+		return
+	}
+
+	fmt.Println(storeInput)
 
 	// checking file upload
 	file, err := c.FormFile("logo")
@@ -63,7 +71,8 @@ func (h *storeHandler) StoreRegister(c *gin.Context) {
 
 	store, err := h.service.StoreRegister(storeInput)
 	if err != nil {
-		trx.Rollback()
+		fmt.Println("masuk if save")
+		// trx.Rollback()
 		errors := helpers.FormatValidationError(err)
 		errorMessage := gin.H{"erorrs": errors}
 
@@ -73,7 +82,7 @@ func (h *storeHandler) StoreRegister(c *gin.Context) {
 	}
 
 	// save file
-	dst := fmt.Sprintf("./logos/%s", file.Filename)
+	dst := fmt.Sprintf("./storage/logos/%s", file.Filename)
 	if err := c.SaveUploadedFile(file, dst); err != nil {
 		trx.Rollback()
 		errors := helpers.FormatValidationError(err)
@@ -85,6 +94,6 @@ func (h *storeHandler) StoreRegister(c *gin.Context) {
 	}
 
 	trx.Commit()
-	response := helpers.APIResponse("Success create new store", http.StatusCreated, "success", store)
+	response := helpers.APIResponse("Success create new store", http.StatusCreated, "success", dto.FormatStoreRegister(c.Request.Host+"/api/v1", store))
 	c.JSON(http.StatusOK, response)
 }

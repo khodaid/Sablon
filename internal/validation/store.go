@@ -8,5 +8,5 @@ type RegisterStoreInput struct {
 	Phone        string                `form:"phone" binding:"required"`
 	Email        string                `form:"email" binding:"required,email"`
 	SupplierCode string                `form:"supplier_code" binding:"required"`
-	Logo         *multipart.FileHeader `form:"logo" binding:"required,image"`
+	Logo         *multipart.FileHeader `form:"logo" binding:"required"`
 }

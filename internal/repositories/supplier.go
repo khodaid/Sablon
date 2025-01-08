@@ -17,9 +17,9 @@ func NewSupplierRepository(db *gorm.DB) *supplierRepositories {
 	return &supplierRepositories{db}
 }
 
-func (r *supplierRepositories) GetIdByCode(email string) (string, error) {
+func (r *supplierRepositories) GetIdByCode(code string) (string, error) {
 	var supplier models.Supplier
-	err := r.db.Where("email = ?", email).Find(&supplier).Error
+	err := r.db.Where("referral_code = ?", code).Find(&supplier).Error
 
 	if err != nil {
 		return supplier.ID, err

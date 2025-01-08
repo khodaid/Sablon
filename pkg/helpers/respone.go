@@ -1,6 +1,10 @@
 package helpers
 
-import "github.com/go-playground/validator/v10"
+import (
+	"fmt"
+
+	"github.com/go-playground/validator/v10"
+)
 
 type Response struct {
 	Meta Meta        `json:"meta"`
@@ -26,11 +30,35 @@ func APIResponse(message string, code int, status string, data interface{}) Resp
 	return jsonResponse
 }
 
-func FormatValidationError(err error) []string {
-	var errors []string
+// func FormatValidationError(err error) []string {
+// 	var errors []string
 
-	for _, e := range err.(validator.ValidationErrors) {
-		errors = append(errors, e.Error())
+// 	// Periksa apakah error adalah tipe validator.ValidationErrors
+// 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
+// 		for _, e := range validationErrors {
+// 			errors = append(errors, e.Error())
+// 			fmt.Println(e.Field())
+// 			fmt.Println(e.Tag())
+// 		}
+// 	} else {
+// 		// Jika error bukan tipe validator.ValidationErrors, tambahkan pesan default
+// 		errors = append(errors, err.Error())
+// 	}
+
+// 	return errors
+// }
+
+func FormatValidationError(err error) map[string]string {
+	errors := make(map[string]string)
+
+	if validationErrors, ok := err.(validator.ValidationErrors); ok {
+		for _, e := range validationErrors {
+			field := e.Field() // Nama field
+			tag := e.Tag()     // Tag validasi yang gagal
+			errors[field] = fmt.Sprintf("Validation failed on '%s' tag", tag)
+		}
+	} else {
+		errors["general"] = err.Error() // Error umum jika bukan ValidationErrors
 	}
 
 	return errors
