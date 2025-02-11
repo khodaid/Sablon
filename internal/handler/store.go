@@ -69,7 +69,9 @@ func (h *storeHandler) StoreRegister(c *gin.Context) {
 
 	trx := h.db.Begin()
 
-	store, err := h.service.StoreRegister(storeInput)
+	newFileName := fmt.Sprintf("%s%s", helpers.GenerateRandomString(16), fileExt)
+
+	store, err := h.service.StoreRegister(storeInput, newFileName)
 	if err != nil {
 		fmt.Println("masuk if save")
 		// trx.Rollback()
@@ -82,7 +84,7 @@ func (h *storeHandler) StoreRegister(c *gin.Context) {
 	}
 
 	// save file
-	dst := fmt.Sprintf("./storage/logos/%s", file.Filename)
+	dst := fmt.Sprintf("./storage/logos/%s", newFileName)
 	if err := c.SaveUploadedFile(file, dst); err != nil {
 		trx.Rollback()
 		errors := helpers.FormatValidationError(err)
@@ -94,6 +96,7 @@ func (h *storeHandler) StoreRegister(c *gin.Context) {
 	}
 
 	trx.Commit()
-	response := helpers.APIResponse("Success create new store", http.StatusCreated, "success", dto.FormatStoreRegister(c.Request.Host+"/api/v1", store))
+	// response := helpers.APIResponse("Success create new store", http.StatusCreated, "success", dto.FormatStoreRegister(c.Request.Host+"/api/v1", store))
+	response := helpers.APIResponse("Success create new store", http.StatusCreated, "success", dto.FormatStoreRegister(helpers.GetFullBaseURL(c, "/api/v1"), store))
 	c.JSON(http.StatusOK, response)
 }

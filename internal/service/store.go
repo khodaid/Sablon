@@ -7,7 +7,7 @@ import (
 )
 
 type StoreService interface {
-	StoreRegister(validation.RegisterStoreInput) (models.Store, error)
+	StoreRegister(validation.RegisterStoreInput, string) (models.Store, error)
 }
 
 type storeService struct {
@@ -19,7 +19,7 @@ func NewStoreService(storeRepository repositories.StoreRepository, supplierRepos
 	return &storeService{storeRepository: storeRepository, supplierRepositoy: supplierRepository}
 }
 
-func (s *storeService) StoreRegister(input validation.RegisterStoreInput) (models.Store, error) {
+func (s *storeService) StoreRegister(input validation.RegisterStoreInput, fileName string) (models.Store, error) {
 	store := models.Store{}
 
 	supplierId, err := s.supplierRepositoy.GetIdByCode(input.SupplierCode)
@@ -27,14 +27,14 @@ func (s *storeService) StoreRegister(input validation.RegisterStoreInput) (model
 		return store, err
 	}
 
-	file := input.Logo
+	// file := input.Logo
 
 	store.Name = input.Name
 	store.Address = input.Address
 	store.Email = input.Email
 	store.Phone = input.Phone
 	store.SupplierId = supplierId
-	store.LogoFileName = file.Filename
+	store.LogoFileName = fileName
 
 	newStore, err := s.storeRepository.Save(store)
 

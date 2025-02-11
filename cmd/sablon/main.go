@@ -8,6 +8,6 @@ import (
 
 func main() {
 	fmt.Println("Hello, World!")
-	config.InitFlags()
+	// config.InitFlags()
 	config.Run()
 }

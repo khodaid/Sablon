@@ -16,6 +16,6 @@ type appEnv struct {
 // }
 
 func (env *appEnv) InitApp(r *gin.Engine) {
-	// r.Run(env.APP_HOST + ":" + env.APP_PORT)
-	r.Run(":" + env.APP_PORT)
+	r.Run(env.APP_HOST + ":" + env.APP_PORT)
+	// r.Run(":" + env.APP_PORT)
 }

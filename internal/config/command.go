@@ -6,7 +6,7 @@ var Migrate bool // Flag untuk migrasi
 var Seed bool    // Flag untuk seeder
 
 // Fungsi untuk inisialisasi flag
-func InitFlags() {
+func init() {
 	// Definisikan flag untuk migrasi database
 	flag.BoolVar(&Migrate, "migrate", false, "Run the auto-migration")
 	// flag.Parse() // Parse flag dari command line
@@ -14,4 +14,8 @@ func InitFlags() {
 	// Definisikan flag untuk seeder database
 	flag.BoolVar(&Seed, "seed", false, "Run the auto-seeder")
 	flag.Parse() // Parse flag dari command line
+}
+
+func (r *repository) runCommand() {
+
 }
