@@ -24,23 +24,26 @@ func TestSaveStore(t *testing.T) {
 	repo := repositories.NewStoreRepository(gormDB)
 
 	store := models.Store{
-		Name:       "Test Store",
-		Address:    "123 Test Address",
-		Phone:      "3243242424",
-		Email:      "tes@mail.com",
-		SupplierId: "abc-123",
+		Name:         "Test Store",
+		Address:      "123 Test Address",
+		Phone:        "3243242424",
+		Email:        "tes@mail.com",
+		LogoFileName: "dsdsds.jpg",
+		// SupplierId:   "e19df034-c3e0-4c56-994b-d460f44d2ecc",
 	}
 
 	mock.ExpectBegin()
-	mock.ExpectExec("INSERT INTO \"store\"").WithArgs(
-		sqlmock.AnyArg(),
+	mock.ExpectExec("INSERT INTO \"stores\"").WithArgs(
+		sqlmock.AnyArg(), // id (UUID yang di-generate secara otomatis)
 		store.Name,
 		store.Address,
 		store.Phone,
 		store.Email,
+		store.LogoFileName,
 		sqlmock.AnyArg(),
-		sqlmock.AnyArg(),
-		store.SupplierId,
+		sqlmock.AnyArg(), // created_at
+		sqlmock.AnyArg(), // updated_at
+		nil,              // deleted_at
 	).WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 

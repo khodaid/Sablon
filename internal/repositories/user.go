@@ -7,6 +7,7 @@ import (
 
 type UserRepository interface {
 	FindByEmail(string) (models.User, error)
+	Save(models.User) (models.User, error)
 	// FindAll() []models.User
 }
 

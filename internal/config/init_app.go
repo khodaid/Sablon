@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
+	"github.com/khodaid/Sablon/internal/config/jwt"
 	"github.com/khodaid/Sablon/internal/handler"
 	"github.com/khodaid/Sablon/internal/repositories"
 	"github.com/khodaid/Sablon/internal/route"
@@ -28,9 +30,22 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-// func NewRoute(g *gin.Engine) *RouteConfig {
-// 	return &RouteConfig{g}
-// }
+func getEnvAsInt(key string, fallback int) int {
+
+	if value, ok := os.LookupEnv(key); ok {
+		if value == "" {
+			return fallback
+		}
+
+		result, err := strconv.Atoi(value)
+		if err != nil {
+			return fallback
+		}
+		return result
+	}
+
+	return fallback
+}
 
 func runCommand(g *repository, db_conect string) bool {
 	if Migrate || Seed {
@@ -49,6 +64,7 @@ func runCommand(g *repository, db_conect string) bool {
 func Run() {
 	app_config := appEnv{}
 	db_config := dbEnv{}
+	jwt_config := jwt.JwtEnv{}
 
 	err := godotenv.Load()
 	if err != nil {
@@ -67,6 +83,9 @@ func Run() {
 	db_config.DB_USER = getEnv("DB_USERNAME", "root")
 	db_config.DB_PASSWORD = getEnv("DB_PASSWORD", "")
 
+	jwt_config.JwtSecret = getEnv("JWT_SECRET", "rahasia")
+	jwt_config.JwtExpiration = getEnvAsInt("JWT_EXPIRATION", 3600)
+
 	flag.Parse()
 	arg := flag.Arg(0)
 
@@ -83,9 +102,11 @@ func Run() {
 			return
 		}
 
+		jwtService := jwt.NewJWTService(jwt_config.JwtSecret, jwt_config.JwtExpiration)
+
 		userRepository := repositories.NewUserRepository(g.db)
 		userService := service.NewUserService(userRepository)
-		userHandler := handler.NewUserHandler(userService)
+		userHandler := handler.NewUserHandler(userService, jwtService)
 
 		supplierRepository := repositories.NewSupplierRepository(g.db)
 
