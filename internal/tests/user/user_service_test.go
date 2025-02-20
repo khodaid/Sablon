@@ -14,7 +14,7 @@ type mockUserService struct {
 	mock.Mock
 }
 
-func (m *mockUserService) Login(input validation.Login) (models.User, error) {
+func (m *mockUserService) Login(input validation.LoginUserInput) (models.User, error) {
 	args := m.Called(input)
 	return args.Get(0).(models.User), args.Error(1)
 }
@@ -26,7 +26,7 @@ func (m *mockUserService) Register(input validation.RegisterUserStoreAdminInput)
 
 func TestLoginUserSuccess(t *testing.T) {
 	mockService := new(mockUserService)
-	testInput := validation.Login{
+	testInput := validation.LoginUserInput{
 		Email:    "khoda@mail.com",
 		Password: "password",
 	}
@@ -48,7 +48,7 @@ func TestLoginUserSuccess(t *testing.T) {
 }
 func TestLoginUserFailed(t *testing.T) {
 	mockService := new(mockUserService)
-	testInput := validation.Login{
+	testInput := validation.LoginUserInput{
 		Email:    "khoda@mail.com",
 		Password: "password",
 	}

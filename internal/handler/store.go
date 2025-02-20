@@ -37,6 +37,52 @@ func (h *storeHandler) StoreRegister(c *gin.Context) {
 
 	fmt.Println(storeInput)
 
+	// // coba goroutine
+	// wg := sync.WaitGroup{}
+	// var file *multipart.FileHeader
+	// go func() {
+	// 	wg.Add(1)
+	// 	var err error
+	// 	file, err = c.FormFile("logo")
+	// 	if err != nil {
+	// 		errors := helpers.FormatValidationError(err)
+	// 		errorMessage := gin.H{"errors": errors}
+
+	// 		response := helpers.APIResponse("Logo is required", http.StatusUnprocessableEntity, "error", errorMessage)
+	// 		c.JSON(http.StatusBadRequest, response)
+	// 		return
+	// 	}
+	// 	wg.Done()
+	// }()
+
+	// go func() {
+	// 	wg.Add(2)
+	// 	fileLimit := helpers.MaxFileSizeMB(2, int(file.Size))
+	// 	if fileLimit != nil {
+	// 		errorMessage := gin.H{"errors": fileLimit}
+	// 		response := helpers.APIResponse("File more than limit", http.StatusUnprocessableEntity, "error", errorMessage)
+	// 		c.JSON(http.StatusUnprocessableEntity, response)
+	// 		return
+	// 	}
+	// 	wg.Done()
+	// }()
+
+	// var fileExt string
+	// go func() {
+	// 	wg.Add(3)
+	// 	fileExt = filepath.Ext(file.Filename)
+	// 	extNotAllowed := helpers.ValidationLogoExtensions(fileExt)
+	// 	if extNotAllowed != nil {
+	// 		errorMessage := gin.H{"errors": extNotAllowed}
+	// 		response := helpers.APIResponse("Invalid logo file type", http.StatusUnprocessableEntity, "error", errorMessage)
+	// 		c.JSON(http.StatusUnprocessableEntity, response)
+	// 		return
+	// 	}
+	// 	wg.Done()
+	// }()
+
+	// wg.Wait()
+
 	// checking file upload
 	file, err := c.FormFile("logo")
 	if err != nil {

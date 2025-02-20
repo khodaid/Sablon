@@ -30,7 +30,7 @@ func (h *handlers) InitRoute() *gin.Engine {
 
 	v1.POST("/login", h.userHandler.Login)
 
-	register := v1.Group("register")
+	register := v1.Group("/register")
 	register.POST("/user", h.userHandler.RegisterUserRoot)
 	register.POST("/store", h.storeHandler.StoreRegister)
 

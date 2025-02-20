@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/khodaid/Sablon/internal/config/jwt"
+	"github.com/khodaid/Sablon/internal/dto"
 	"github.com/khodaid/Sablon/internal/service"
 	"github.com/khodaid/Sablon/internal/validation"
 	"github.com/khodaid/Sablon/pkg/helpers"
@@ -52,5 +52,47 @@ func (h *userHandler) RegisterUserRoot(c *gin.Context) {
 }
 
 func (h *userHandler) Login(c *gin.Context) {
-	log.Println("masuk user handler user")
+	// validasi login input
+	var input validation.LoginUserInput
+
+	// binding input
+	err := c.ShouldBind(&input)
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		respone := helpers.APIResponse("Error bindding data", http.StatusExpectationFailed, "error", errorMessage)
+		c.JSON(http.StatusExpectationFailed, respone)
+		return
+	}
+
+	user, err := h.userService.Login(input)
+
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		respone := helpers.APIResponse("Failed find user", http.StatusBadRequest, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, respone)
+		return
+	}
+
+	token, err := h.jwtService.GenerateToken(user.ID)
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		respone := helpers.APIResponse("Failed find user", http.StatusExpectationFailed, "error", errorMessage)
+		c.JSON(http.StatusExpectationFailed, respone)
+		return
+	}
+	c.Header("X-AUTH", token)
+
+	userData := dto.FormatDetailUserLogin(user)
+
+	respone := helpers.APIResponse("Success findding user store", http.StatusOK, "success", map[string]interface{}{
+		"token": token,
+		"user":  userData,
+	})
+	c.JSON(http.StatusOK, respone)
 }

@@ -11,7 +11,7 @@ import (
 )
 
 type UserService interface {
-	Login(validation.Login) (models.User, error)
+	Login(validation.LoginUserInput) (models.User, error)
 	Register(validation.RegisterUserStoreAdminInput) (models.User, error)
 }
 
@@ -23,7 +23,7 @@ func NewUserService(repository repositories.UserRepository) *userService {
 	return &userService{repository}
 }
 
-func (s *userService) Login(input validation.Login) (models.User, error) {
+func (s *userService) Login(input validation.LoginUserInput) (models.User, error) {
 	email := input.Email
 	password := input.Password
 

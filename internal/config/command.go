@@ -15,7 +15,3 @@ func init() {
 	flag.BoolVar(&Seed, "seed", false, "Run the auto-seeder")
 	flag.Parse() // Parse flag dari command line
 }
-
-func (r *repository) runCommand() {
-
-}
