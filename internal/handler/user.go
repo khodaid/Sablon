@@ -14,6 +14,7 @@ import (
 type UserHandler interface {
 	Login(c *gin.Context)
 	RegisterUserRoot(c *gin.Context)
+	GetAllWithOutSoftDelete(c *gin.Context)
 }
 
 type userHandler struct {
@@ -94,5 +95,20 @@ func (h *userHandler) Login(c *gin.Context) {
 		"token": token,
 		"user":  userData,
 	})
+	c.JSON(http.StatusOK, respone)
+}
+
+func (h *userHandler) GetAllWithOutSoftDelete(c *gin.Context) {
+	users, err := h.userService.GetAllWithOutSoftDelete()
+
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorsMessage := gin.H{"error": errors}
+		respone := helpers.APIResponse("Failed fetch all user without soft delete", http.StatusBadRequest, "error", errorsMessage)
+		c.AbortWithStatusJSON(http.StatusBadGateway, respone)
+		return
+	}
+
+	respone := helpers.APIResponse("Success fetch all user without soft delete", http.StatusOK, "success", users)
 	c.JSON(http.StatusOK, respone)
 }

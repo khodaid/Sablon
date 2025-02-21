@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/khodaid/Sablon/internal/config/jwt"
 	"github.com/khodaid/Sablon/internal/handler"
+	"github.com/khodaid/Sablon/internal/middleware"
 	"github.com/khodaid/Sablon/internal/repositories"
 	"github.com/khodaid/Sablon/internal/route"
 	"github.com/khodaid/Sablon/internal/service"
@@ -113,7 +114,9 @@ func Run() {
 		storeRepository := repositories.NewStoreRepository(g.db)
 		storeService := service.NewStoreService(storeRepository, supplierRepository)
 		storehandler := handler.NewStoreHandler(g.db, storeService)
-		routing := route.NewRoute(userHandler, storehandler)
+
+		protected := middleware.NewAuthMiddleware(jwtService)
+		routing := route.NewRoute(userHandler, storehandler, protected)
 
 		r := routing.InitRoute()
 		fmt.Println(app_config)

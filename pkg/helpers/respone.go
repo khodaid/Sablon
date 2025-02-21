@@ -58,7 +58,7 @@ func FormatValidationError(err error) map[string]string {
 			errors[field] = fmt.Sprintf("Validation failed on '%s' tag", tag)
 		}
 	} else {
-		errors["general"] = err.Error() // Error umum jika bukan ValidationErrors
+		errors["general"] = err.Error() // Error umum jika bukan Validation Errors
 	}
 
 	return errors

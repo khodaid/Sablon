@@ -13,6 +13,7 @@ import (
 type UserService interface {
 	Login(validation.LoginUserInput) (models.User, error)
 	Register(validation.RegisterUserStoreAdminInput) (models.User, error)
+	GetAllWithOutSoftDelete() ([]models.User, error)
 }
 
 type userService struct {
@@ -70,4 +71,14 @@ func (s *userService) Register(input validation.RegisterUserStoreAdminInput) (mo
 	}
 
 	return new_user, nil
+}
+
+func (s *userService) GetAllWithOutSoftDelete() ([]models.User, error) {
+	users, err := s.repository.FindAll()
+
+	if err != nil {
+		return users, err
+	}
+
+	return users, nil
 }

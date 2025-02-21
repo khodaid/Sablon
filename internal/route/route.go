@@ -3,22 +3,34 @@ package route
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/khodaid/Sablon/internal/handler"
+	"github.com/khodaid/Sablon/internal/middleware"
 )
 
-// type routeConfig struct {
-// 	g *gin.Engine
-// }
+type newRoute struct {
+	handler    *handlers
+	middleware *middlewares
+}
 
 type handlers struct {
 	userHandler  handler.UserHandler
 	storeHandler handler.StoreHandler
 }
 
-func NewRoute(user handler.UserHandler, store handler.StoreHandler) *handlers {
-	return &handlers{user, store}
+type middlewares struct {
+	auth middleware.Middleware
 }
 
-func (h *handlers) InitRoute() *gin.Engine {
+func NewRoute(user handler.UserHandler, store handler.StoreHandler, authMiddleware middleware.Middleware) *newRoute {
+	return &newRoute{
+		handler: &handlers{
+			userHandler:  user,
+			storeHandler: store,
+		},
+		middleware: &middlewares{auth: authMiddleware},
+	}
+}
+
+func (r *newRoute) InitRoute() *gin.Engine {
 	c := gin.Default()
 
 	api := c.Group("/api")
@@ -28,11 +40,14 @@ func (h *handlers) InitRoute() *gin.Engine {
 	image := v1.Group("/file")
 	image.Static("/image", "./storage/logos/")
 
-	v1.POST("/login", h.userHandler.Login)
+	v1.POST("/login", r.handler.userHandler.Login)
 
 	register := v1.Group("/register")
-	register.POST("/user", h.userHandler.RegisterUserRoot)
-	register.POST("/store", h.storeHandler.StoreRegister)
+	register.POST("/user", r.handler.userHandler.RegisterUserRoot)
+	register.POST("/store", r.handler.storeHandler.StoreRegister)
+
+	authProtected := v1.Use(r.middleware.auth.AuthMiddleware())
+	authProtected.Static("/test", "./storage/logos/")
 
 	// userV1 := v1.Group("/user")
 

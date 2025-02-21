@@ -8,7 +8,7 @@ import (
 type UserRepository interface {
 	FindByEmail(string) (models.User, error)
 	Save(models.User) (models.User, error)
-	// FindAll() []models.User
+	FindAll() ([]models.User, error)
 }
 
 type repository struct {
@@ -50,4 +50,59 @@ func (r *repository) Save(user models.User) (models.User, error) {
 	}
 
 	return user, nil
+}
+
+func (r *repositories) FindById(id string) (models.User, error) {
+	var user models.User
+
+	err := r.db.Where("id", id).Find(&user).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *repositories) Update(user models.User) (models.User, error) {
+	err := r.db.Save(&user).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *repositories) SoftDelete(user models.User) (models.User, error) {
+	err := r.db.Delete(&user).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *repositories) HardDelete(user models.User) (models.User, error) {
+	err := r.db.Unscoped().Delete(&user).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *repositories) FindAllWithSoftDelete() ([]models.User, error) {
+	var users []models.User
+
+	err := r.db.Unscoped().Find(&users).Error
+
+	if err != nil {
+		return users, err
+	}
+
+	return users, nil
+
 }
