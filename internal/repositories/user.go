@@ -22,7 +22,7 @@ func NewUserRepository(db *gorm.DB) *repository {
 func (r *repository) FindByEmail(email string) (models.User, error) {
 	var user models.User
 
-	err := r.db.Where("email = ? ", email).Preload("UserRoleAdmin.Role").Find(&user).Error
+	err := r.db.Where("email = ? ", email).Preload("UserRoleAdmin.Role").Preload("UserStore.Store").Find(&user).Error
 
 	if err != nil {
 		return user, err
@@ -105,4 +105,21 @@ func (r *repositories) FindAllWithSoftDelete() ([]models.User, error) {
 
 	return users, nil
 
+}
+
+func (r *repositories) GetAllUserByStore(email string) ([]models.User, error) {
+	var users []models.User
+
+	err := r.db.Model(&models.User{}).
+		Joins("JOIN user_stores us1 ON users.id = us1.user_id").
+		Joins("JOIN user_stores us2 ON us1.store_id = us2.store_id").
+		Joins("JOIN users u ON us2.user_id = u.id").
+		Group("u.id").
+		Find(&users).Error
+
+	if err != nil {
+		return users, err
+	}
+
+	return users, nil
 }

@@ -11,5 +11,6 @@ type Store struct {
 	LogoFileName string   `gorm:"size:255;"`
 	SupplierId   string   `gorm:"type:char(36); not null"`
 	Supplier     Supplier `gorm:"foreignKey:SupplierId; references:ID; constarint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	UserStore    UserStore
 	base.TimeStamp
 }

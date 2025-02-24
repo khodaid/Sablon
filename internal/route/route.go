@@ -20,14 +20,16 @@ type middlewares struct {
 	auth middleware.Middleware
 }
 
-func NewRoute(user handler.UserHandler, store handler.StoreHandler, authMiddleware middleware.Middleware) *newRoute {
-	return &newRoute{
-		handler: &handlers{
-			userHandler:  user,
-			storeHandler: store,
-		},
-		middleware: &middlewares{auth: authMiddleware},
-	}
+func NewRouteHandler(user handler.UserHandler, store handler.StoreHandler) *handlers {
+	return &handlers{userHandler: user, storeHandler: store}
+}
+
+func NewRouteMiddleware(auth middleware.Middleware) *middlewares {
+	return &middlewares{auth: auth}
+}
+
+func NewRoute(handler *handlers, middleware *middlewares) *newRoute {
+	return &newRoute{handler: handler, middleware: middleware}
 }
 
 func (r *newRoute) InitRoute() *gin.Engine {

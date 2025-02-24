@@ -116,7 +116,10 @@ func Run() {
 		storehandler := handler.NewStoreHandler(g.db, storeService)
 
 		protected := middleware.NewAuthMiddleware(jwtService)
-		routing := route.NewRoute(userHandler, storehandler, protected)
+
+		routingHandler := route.NewRouteHandler(userHandler, storehandler)
+		routingMiddleware := route.NewRouteMiddleware(protected)
+		routing := route.NewRoute(routingHandler, routingMiddleware)
 
 		r := routing.InitRoute()
 		fmt.Println(app_config)

@@ -10,5 +10,6 @@ type User struct {
 	Password      string `gorm:"size:100;not null"`
 	RememberToken string `gorm:"size:255"`
 	UserRoleAdmin *UserRoleAdmin
+	UserStore     UserStore
 	base.TimeStamp
 }

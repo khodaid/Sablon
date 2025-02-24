@@ -6,6 +6,8 @@ func ListSeeder() []interface{} {
 		SeedSuplier(),
 		SeedRole(),
 		SeedUserRoleAdmin(),
+		SeedStore(),
+		SeedUserStore(),
 	}
 
 }

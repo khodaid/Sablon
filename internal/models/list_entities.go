@@ -7,6 +7,7 @@ func GetEntity() []interface{} {
 		&Store{},
 		&Role{},
 		&UserRoleAdmin{},
+		&UserStore{},
 	}
 
 }
