@@ -105,8 +105,10 @@ func Run() {
 
 		jwtService := jwt.NewJWTService(jwt_config.JwtSecret, jwt_config.JwtExpiration)
 
+		roleRepository := repositories.NewRoleRepository(g.db)
+
 		userRepository := repositories.NewUserRepository(g.db)
-		userService := service.NewUserService(userRepository)
+		userService := service.NewUserService(userRepository, roleRepository)
 		userHandler := handler.NewUserHandler(userService, jwtService)
 
 		supplierRepository := repositories.NewSupplierRepository(g.db)

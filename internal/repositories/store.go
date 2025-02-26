@@ -9,15 +9,15 @@ type StoreRepository interface {
 	Save(models.Store) (models.Store, error)
 }
 
-type repositories struct {
+type storeRepository struct {
 	db *gorm.DB
 }
 
-func NewStoreRepository(db *gorm.DB) *repositories {
-	return &repositories{db: db}
+func NewStoreRepository(db *gorm.DB) *storeRepository {
+	return &storeRepository{db: db}
 }
 
-func (r *repositories) Save(store models.Store) (models.Store, error) {
+func (r *storeRepository) Save(store models.Store) (models.Store, error) {
 	err := r.db.Create(&store).Error
 
 	if err != nil {

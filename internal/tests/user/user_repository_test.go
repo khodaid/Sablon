@@ -27,7 +27,7 @@ func (m *MockUserRepository) Save(user models.User) (models.User, error) {
 func TestFindByEmailSuccess(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	testUser := models.User{
-		Id:    base.Id{"f3c5792f-d368-4142-9533-674e98b685db"},
+		Id:    base.Id{ID: "f3c5792f-d368-4142-9533-674e98b685db"},
 		Name:  "khoda store",
 		Email: "khodastore@gmail.com",
 	}
@@ -44,7 +44,7 @@ func TestFindByEmailSuccess(t *testing.T) {
 func TestFindByEmailFailed(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	testUser := models.User{
-		Id:    base.Id{"f3c5792f-d368-4142-9533-674e98b685db"},
+		Id:    base.Id{ID: "f3c5792f-d368-4142-9533-674e98b685db"},
 		Name:  "khoda store",
 		Email: "khodastore@gmail.com",
 	}
@@ -62,7 +62,7 @@ func TestFindByEmailFailed(t *testing.T) {
 func TestSaveUserSuccess(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	newUser := models.User{
-		Id:    base.Id{"f3c5792f-d368-4142-9533-674e98b685db"},
+		Id:    base.Id{ID: "f3c5792f-d368-4142-9533-674e98b685db"},
 		Name:  "khoda store",
 		Email: "khodastore@gmail.com",
 	}
@@ -78,7 +78,7 @@ func TestSaveUserSuccess(t *testing.T) {
 func TestSaveUserFailed(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	newUser := models.User{
-		Id:    base.Id{"f3c5792f-d368-4142-9533-674e98b685db"},
+		Id:    base.Id{ID: "f3c5792f-d368-4142-9533-674e98b685db"},
 		Name:  "khoda store",
 		Email: "khodastore@gmail.com",
 	}

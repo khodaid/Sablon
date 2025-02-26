@@ -48,8 +48,11 @@ func (r *newRoute) InitRoute() *gin.Engine {
 	register.POST("/user", r.handler.userHandler.RegisterUserRoot)
 	register.POST("/store", r.handler.storeHandler.StoreRegister)
 
-	authProtected := v1.Use(r.middleware.auth.AuthMiddleware())
-	authProtected.Static("/test", "./storage/logos/")
+	// authProtected := v1.Use(r.middleware.auth.AuthMiddleware())
+
+	store := v1.Group("/store").Use(r.middleware.auth.AuthMiddleware())
+	store.GET("/users", r.handler.userHandler.GetUsersStore)
+	store.GET("users/:id", r.handler.userHandler.GetUserById)
 
 	// userV1 := v1.Group("/user")
 

@@ -1,9 +1,10 @@
 package jwt
 
 import (
+	"fmt"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type JwtEnv struct {
@@ -48,4 +49,20 @@ func (j *JwtEnv) ValidateToken(encodedToken string) (*jwt.Token, error) {
 		}
 		return []byte(j.JwtSecret), nil
 	})
+}
+
+func DecodeJWT(tokenString string) (map[string]interface{}, error) {
+	// Pisahkan token menjadi 3 bagian (header, payload, signature)
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		fmt.Println("Error decoding token:", err)
+		return nil, err
+	}
+
+	// Ambil claims (payload)
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		return claims, nil
+	}
+
+	return nil, fmt.Errorf("invalid token format")
 }

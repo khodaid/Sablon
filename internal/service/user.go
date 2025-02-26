@@ -13,15 +13,19 @@ import (
 type UserService interface {
 	Login(validation.LoginUserInput) (models.User, error)
 	Register(validation.RegisterUserStoreAdminInput) (models.User, error)
+	GetUserById(id string) (models.User, error)
+	UpdateUserById(userId string, userInput validation.UpdateUserStore) (models.User, error)
 	GetAllWithOutSoftDelete() ([]models.User, error)
+	GetAllUserByStore(string) ([]models.User, error)
 }
 
 type userService struct {
-	repository repositories.UserRepository
+	repository     repositories.UserRepository
+	roleRepository repositories.RoleRepository
 }
 
-func NewUserService(repository repositories.UserRepository) *userService {
-	return &userService{repository}
+func NewUserService(repository repositories.UserRepository, roleRepository repositories.RoleRepository) *userService {
+	return &userService{repository: repository, roleRepository: roleRepository}
 }
 
 func (s *userService) Login(input validation.LoginUserInput) (models.User, error) {
@@ -73,8 +77,55 @@ func (s *userService) Register(input validation.RegisterUserStoreAdminInput) (mo
 	return new_user, nil
 }
 
+func (s *userService) GetUserById(id string) (models.User, error) {
+	user, err := s.repository.FindById(id)
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (s *userService) UpdateUserById(userId string, userInput validation.UpdateUserStore) (models.User, error) {
+	userData, err := s.repository.FindById(userId)
+
+	if err != nil {
+		return userData, err
+	}
+
+	roleData, err := s.roleRepository.FindById(userInput.RoleId)
+
+	if err != nil {
+		return userData, err
+	}
+
+	userData.Name = userInput.Name
+	userData.Email = userInput.Email
+	userData.Phone = userInput.Phone
+	userData.UserRoleAdmin.RoleId = roleData.ID
+
+	result, err := s.repository.Update(userData)
+
+	if err != nil {
+		return userData, err
+	}
+
+	return result, err
+}
+
 func (s *userService) GetAllWithOutSoftDelete() ([]models.User, error) {
 	users, err := s.repository.FindAll()
+
+	if err != nil {
+		return users, err
+	}
+
+	return users, nil
+}
+
+func (s *userService) GetAllUserByStore(id string) ([]models.User, error) {
+	users, err := s.repository.FindAllUserByStore(id)
 
 	if err != nil {
 		return users, err

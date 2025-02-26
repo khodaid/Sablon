@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/khodaid/Sablon/internal/config/jwt"
@@ -14,7 +15,10 @@ import (
 type UserHandler interface {
 	Login(c *gin.Context)
 	RegisterUserRoot(c *gin.Context)
+	GetUserById(c *gin.Context)
+	UpdateUserStore(c *gin.Context)
 	GetAllWithOutSoftDelete(c *gin.Context)
+	GetUsersStore(c *gin.Context)
 }
 
 type userHandler struct {
@@ -98,6 +102,51 @@ func (h *userHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, respone)
 }
 
+func (h *userHandler) GetUserById(c *gin.Context) {
+	userId := c.Param("id")
+	user, err := h.userService.GetUserById(userId)
+
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorsMessage := gin.H{"message": errors}
+		respone := helpers.APIResponse("failed get user", http.StatusBadRequest, "error", errorsMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, respone)
+		return
+	}
+
+	userData := dto.FormatAllUsersStore(user)
+	respone := helpers.APIResponse("success get user", http.StatusOK, "success", userData)
+	c.JSON(http.StatusOK, respone)
+}
+
+func (h *userHandler) UpdateUserStore(c *gin.Context) {
+	var input validation.UpdateUserStore
+
+	err := c.ShouldBind(input)
+
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"message": errors}
+		respone := helpers.APIResponse("failed binding input", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, respone)
+		return
+	}
+
+	userId := c.Param("id")
+
+	result, err := h.userService.UpdateUserById(userId, input)
+
+	if err != nil {
+		error := helpers.FormatValidationError(err)
+		errorsMessage := gin.H{"message": error}
+		respone := helpers.APIResponse("failed updated user", http.StatusUnprocessableEntity, "error", errorsMessage)
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, respone)
+		return
+	}
+	respone := helpers.APIResponse("success updated user", http.StatusOK, "success", result)
+	c.JSON(http.StatusOK, respone)
+}
+
 func (h *userHandler) GetAllWithOutSoftDelete(c *gin.Context) {
 	users, err := h.userService.GetAllWithOutSoftDelete()
 
@@ -110,5 +159,36 @@ func (h *userHandler) GetAllWithOutSoftDelete(c *gin.Context) {
 	}
 
 	respone := helpers.APIResponse("Success fetch all user without soft delete", http.StatusOK, "success", users)
+	c.JSON(http.StatusOK, respone)
+}
+
+func (h *userHandler) GetUsersStore(c *gin.Context) {
+	tokenAuth := c.GetHeader("Authorization")
+	if tokenAuth == "" {
+		respone := helpers.APIResponse("Failed get users store", http.StatusUnauthorized, "error", "")
+		c.AbortWithStatusJSON(http.StatusUnauthorized, respone)
+	}
+
+	token := strings.Split(tokenAuth, " ")
+	decodeToken, err := jwt.DecodeJWT(token[1])
+
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorsMessage := gin.H{"error": errors}
+		respone := helpers.APIResponse("Failed", http.StatusBadRequest, "error", errorsMessage)
+		c.AbortWithStatusJSON(http.StatusBadGateway, respone)
+		return
+	}
+
+	users, err := h.userService.GetAllUserByStore(decodeToken["user_id"].(string))
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorsMessage := gin.H{"error": errors}
+		respone := helpers.APIResponse("Failed", http.StatusBadRequest, "error", errorsMessage)
+		c.AbortWithStatusJSON(http.StatusBadGateway, respone)
+		return
+	}
+
+	respone := helpers.APIResponse("Success", http.StatusOK, "success", users)
 	c.JSON(http.StatusOK, respone)
 }

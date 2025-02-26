@@ -26,7 +26,7 @@ func (j *jwtMiddleware) AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")
 		if authHeader == "" {
-			respone := helpers.APIResponse("Autorization not found", http.StatusNotFound, "error", "")
+			respone := helpers.APIResponse("Authorization not found", http.StatusNotFound, "error", "")
 			ctx.AbortWithStatusJSON(http.StatusNotFound, respone)
 			return
 		}

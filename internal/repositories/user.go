@@ -9,6 +9,9 @@ type UserRepository interface {
 	FindByEmail(string) (models.User, error)
 	Save(models.User) (models.User, error)
 	FindAll() ([]models.User, error)
+	FindAllUserByStore(string) ([]models.User, error)
+	FindById(string) (models.User, error)
+	Update(user models.User) (models.User, error)
 }
 
 type repository struct {
@@ -52,10 +55,10 @@ func (r *repository) Save(user models.User) (models.User, error) {
 	return user, nil
 }
 
-func (r *repositories) FindById(id string) (models.User, error) {
+func (r *repository) FindById(id string) (models.User, error) {
 	var user models.User
 
-	err := r.db.Where("id", id).Find(&user).Error
+	err := r.db.Where("id", id).Preload("UserRoleAdmin.Role").First(&user).Error
 
 	if err != nil {
 		return user, err
@@ -64,7 +67,7 @@ func (r *repositories) FindById(id string) (models.User, error) {
 	return user, nil
 }
 
-func (r *repositories) Update(user models.User) (models.User, error) {
+func (r *repository) Update(user models.User) (models.User, error) {
 	err := r.db.Save(&user).Error
 
 	if err != nil {
@@ -74,7 +77,7 @@ func (r *repositories) Update(user models.User) (models.User, error) {
 	return user, nil
 }
 
-func (r *repositories) SoftDelete(user models.User) (models.User, error) {
+func (r *repository) SoftDelete(user models.User) (models.User, error) {
 	err := r.db.Delete(&user).Error
 
 	if err != nil {
@@ -84,7 +87,7 @@ func (r *repositories) SoftDelete(user models.User) (models.User, error) {
 	return user, nil
 }
 
-func (r *repositories) HardDelete(user models.User) (models.User, error) {
+func (r *repository) HardDelete(user models.User) (models.User, error) {
 	err := r.db.Unscoped().Delete(&user).Error
 
 	if err != nil {
@@ -94,7 +97,7 @@ func (r *repositories) HardDelete(user models.User) (models.User, error) {
 	return user, nil
 }
 
-func (r *repositories) FindAllWithSoftDelete() ([]models.User, error) {
+func (r *repository) FindAllWithSoftDelete() ([]models.User, error) {
 	var users []models.User
 
 	err := r.db.Unscoped().Find(&users).Error
@@ -107,14 +110,20 @@ func (r *repositories) FindAllWithSoftDelete() ([]models.User, error) {
 
 }
 
-func (r *repositories) GetAllUserByStore(email string) ([]models.User, error) {
+func (r *repository) FindAllUserByStore(id string) ([]models.User, error) {
 	var users []models.User
+	var user models.User
 
-	err := r.db.Model(&models.User{}).
-		Joins("JOIN user_stores us1 ON users.id = us1.user_id").
-		Joins("JOIN user_stores us2 ON us1.store_id = us2.store_id").
-		Joins("JOIN users u ON us2.user_id = u.id").
-		Group("u.id").
+	err := r.db.Preload("UserStore").Where("id = ?", id).First(&user).Error
+
+	if err != nil {
+		return users, err
+	}
+
+	err = r.db.Preload("UserRoleAdmin.Role").
+		Joins("JOIN user_stores ON users.id = user_stores.user_id").
+		Where("user_stores.store_id = ?", user.UserStore.StoreId).
+		Group("users.id").
 		Find(&users).Error
 
 	if err != nil {
