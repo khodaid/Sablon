@@ -10,7 +10,7 @@ type loginDetailFormatter struct {
 	Email        string `json:"email"`
 	IsBackoffice bool   `json:"is_backoffice"`
 	Role         string `json:"role"`
-	LogoUrl      string `json:logo_url`
+	LogoUrl      string `json:"logo_url"`
 }
 
 type allUserStoreFormatter struct {
