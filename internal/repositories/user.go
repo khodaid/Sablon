@@ -12,6 +12,10 @@ type UserRepository interface {
 	FindAllUserByStore(string) ([]models.User, error)
 	FindById(string) (models.User, error)
 	Update(user models.User) (models.User, error)
+	SoftDelete(user models.User) (models.User, error)
+	FindAllWithSoftDelete() ([]models.User, error)
+	FindSoftDeleteById(id string) (models.User, error)
+	HardDelete(user models.User) (models.User, error)
 }
 
 type repository struct {
@@ -108,6 +112,17 @@ func (r *repository) FindAllWithSoftDelete() ([]models.User, error) {
 
 	return users, nil
 
+}
+
+func (r *repository) FindSoftDeleteById(id string) (models.User, error) {
+	var user models.User
+
+	err := r.db.Unscoped().First(&user).Error
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
 
 func (r *repository) FindAllUserByStore(id string) ([]models.User, error) {

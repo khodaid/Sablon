@@ -45,16 +45,22 @@ func (r *newRoute) InitRoute() *gin.Engine {
 	v1.POST("/login", r.handler.userHandler.Login)
 
 	register := v1.Group("/register")
-	register.POST("/user", r.handler.userHandler.RegisterUserRoot)
-	register.POST("/store", r.handler.storeHandler.StoreRegister)
+	{
+		register.POST("/user", r.handler.userHandler.RegisterUserRoot)
+		register.POST("/store", r.handler.storeHandler.StoreRegister)
+	}
 
-	// authProtected := v1.Use(r.middleware.auth.AuthMiddleware())
+	store := v1.Group("/store")
+	store.Use(r.middleware.auth.AuthMiddleware())
 
-	store := v1.Group("/store").Use(r.middleware.auth.AuthMiddleware())
-	store.GET("/users", r.handler.userHandler.GetUsersStore)
-	store.GET("users/:id", r.handler.userHandler.GetUserById)
+	storeUsers := store.Group("/users")
+	{
+		storeUsers.GET("/", r.handler.userHandler.GetUsersStore)
+		storeUsers.GET("/:id", r.handler.userHandler.GetUserById)
+		storeUsers.PUT("/update/:id", r.handler.userHandler.UpdateUserStore)
+		storeUsers.DELETE("/soft-delete/:id", r.handler.userHandler.SoftDeleteUser)
 
-	// userV1 := v1.Group("/user")
+	}
 
 	return c
 }

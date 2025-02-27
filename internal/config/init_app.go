@@ -117,7 +117,7 @@ func Run() {
 		storeService := service.NewStoreService(storeRepository, supplierRepository)
 		storehandler := handler.NewStoreHandler(g.db, storeService)
 
-		protected := middleware.NewAuthMiddleware(jwtService)
+		protected := middleware.NewAuthMiddleware(jwtService, userService)
 
 		routingHandler := route.NewRouteHandler(userHandler, storehandler)
 		routingMiddleware := route.NewRouteMiddleware(protected)

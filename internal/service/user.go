@@ -15,8 +15,12 @@ type UserService interface {
 	Register(validation.RegisterUserStoreAdminInput) (models.User, error)
 	GetUserById(id string) (models.User, error)
 	UpdateUserById(userId string, userInput validation.UpdateUserStore) (models.User, error)
+	SoftDeleteUserById(id string) (models.User, error)
 	GetAllWithOutSoftDelete() ([]models.User, error)
 	GetAllUserByStore(string) ([]models.User, error)
+	GetAllUsersWithSoftDelete() ([]models.User, error)
+	GetUserWithSoftDelete(string) (models.User, error)
+	HardDeleteUser(string) (models.User, error)
 }
 
 type userService struct {
@@ -114,6 +118,21 @@ func (s *userService) UpdateUserById(userId string, userInput validation.UpdateU
 	return result, err
 }
 
+func (s *userService) SoftDeleteUserById(id string) (models.User, error) {
+	user, err := s.repository.FindById(id)
+	if err != nil {
+		return user, err
+	}
+
+	result, err := s.repository.SoftDelete(user)
+
+	if err != nil {
+		return user, err
+	}
+
+	return result, nil
+}
+
 func (s *userService) GetAllWithOutSoftDelete() ([]models.User, error) {
 	users, err := s.repository.FindAll()
 
@@ -132,4 +151,39 @@ func (s *userService) GetAllUserByStore(id string) ([]models.User, error) {
 	}
 
 	return users, nil
+}
+
+func (s *userService) GetAllUsersWithSoftDelete() ([]models.User, error) {
+	users, err := s.repository.FindAllWithSoftDelete()
+	if err != nil {
+		return users, err
+	}
+
+	return users, nil
+}
+
+func (s *userService) GetUserWithSoftDelete(id string) (models.User, error) {
+	user, err := s.repository.FindSoftDeleteById(id)
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (s *userService) HardDeleteUser(id string) (models.User, error) {
+	user, err := s.repository.FindSoftDeleteById(id)
+
+	if err != nil {
+		return user, err
+	}
+
+	result, err := s.repository.HardDelete(user)
+
+	if err != nil {
+		return user, err
+	}
+
+	return result, nil
 }
