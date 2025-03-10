@@ -87,6 +87,9 @@ func Run() {
 	jwt_config.JwtSecret = getEnv("JWT_SECRET", "rahasia")
 	jwt_config.JwtExpiration = getEnvAsInt("JWT_EXPIRATION", 3600)
 
+	csrfSecret := getEnv("CSRF_SECRET", "rahasia")
+	csrfExpired := getEnvAsInt("CSRF_EXPIRATION", 3600)
+
 	flag.Parse()
 	arg := flag.Arg(0)
 
@@ -104,6 +107,8 @@ func Run() {
 		}
 
 		jwtService := jwt.NewJWTService(jwt_config.JwtSecret, jwt_config.JwtExpiration)
+		csrfService := jwt.NewServiceCsrfToken(csrfSecret, csrfExpired)
+		csrfHandler := handler.NewCsrfHandler(csrfService)
 
 		roleRepository := repositories.NewRoleRepository(g.db)
 
@@ -117,10 +122,11 @@ func Run() {
 		storeService := service.NewStoreService(storeRepository, supplierRepository)
 		storehandler := handler.NewStoreHandler(g.db, storeService)
 
-		protected := middleware.NewAuthMiddleware(jwtService, userService)
+		authMiddleware := middleware.NewAuthMiddleware(jwtService, userService)
+		csrfMiddleware := middleware.NewCSRFMiddleware(csrfService)
 
-		routingHandler := route.NewRouteHandler(userHandler, storehandler)
-		routingMiddleware := route.NewRouteMiddleware(protected)
+		routingHandler := route.NewRouteHandler(csrfHandler, userHandler, storehandler)
+		routingMiddleware := route.NewRouteMiddleware(authMiddleware, csrfMiddleware)
 		routing := route.NewRoute(routingHandler, routingMiddleware)
 
 		r := routing.InitRoute()

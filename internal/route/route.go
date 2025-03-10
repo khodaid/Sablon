@@ -12,20 +12,22 @@ type newRoute struct {
 }
 
 type handlers struct {
+	csrfHandler  handler.CsrfHandler
 	userHandler  handler.UserHandler
 	storeHandler handler.StoreHandler
 }
 
 type middlewares struct {
+	csrf middleware.CSRFMiddleware
 	auth middleware.Middleware
 }
 
-func NewRouteHandler(user handler.UserHandler, store handler.StoreHandler) *handlers {
-	return &handlers{userHandler: user, storeHandler: store}
+func NewRouteHandler(csrf handler.CsrfHandler, user handler.UserHandler, store handler.StoreHandler) *handlers {
+	return &handlers{csrfHandler: csrf, userHandler: user, storeHandler: store}
 }
 
-func NewRouteMiddleware(auth middleware.Middleware) *middlewares {
-	return &middlewares{auth: auth}
+func NewRouteMiddleware(auth middleware.Middleware, csrf middleware.CSRFMiddleware) *middlewares {
+	return &middlewares{auth: auth, csrf: csrf}
 }
 
 func NewRoute(handler *handlers, middleware *middlewares) *newRoute {
@@ -36,8 +38,10 @@ func (r *newRoute) InitRoute() *gin.Engine {
 	c := gin.Default()
 
 	api := c.Group("/api")
+	api.Use(r.middleware.csrf.CsrfMiddleware())
 
 	v1 := api.Group("/v1")
+	v1.GET("/csrf-token", r.handler.csrfHandler.GenerateCSRFToken)
 
 	image := v1.Group("/file")
 	image.Static("/image", "./storage/logos/")
