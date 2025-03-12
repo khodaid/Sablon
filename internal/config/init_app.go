@@ -124,9 +124,10 @@ func Run() {
 
 		authMiddleware := middleware.NewAuthMiddleware(jwtService, userService)
 		csrfMiddleware := middleware.NewCSRFMiddleware(csrfService)
+		corsMiddleware := middleware.NewCorsMiddleware()
 
 		routingHandler := route.NewRouteHandler(csrfHandler, userHandler, storehandler)
-		routingMiddleware := route.NewRouteMiddleware(authMiddleware, csrfMiddleware)
+		routingMiddleware := route.NewRouteMiddleware(authMiddleware, csrfMiddleware, corsMiddleware)
 		routing := route.NewRoute(routingHandler, routingMiddleware)
 
 		r := routing.InitRoute()

@@ -20,14 +20,15 @@ type handlers struct {
 type middlewares struct {
 	csrf middleware.CSRFMiddleware
 	auth middleware.Middleware
+	cors middleware.CorsService
 }
 
 func NewRouteHandler(csrf handler.CsrfHandler, user handler.UserHandler, store handler.StoreHandler) *handlers {
 	return &handlers{csrfHandler: csrf, userHandler: user, storeHandler: store}
 }
 
-func NewRouteMiddleware(auth middleware.Middleware, csrf middleware.CSRFMiddleware) *middlewares {
-	return &middlewares{auth: auth, csrf: csrf}
+func NewRouteMiddleware(auth middleware.Middleware, csrf middleware.CSRFMiddleware, cors middleware.CorsService) *middlewares {
+	return &middlewares{auth: auth, csrf: csrf, cors: cors}
 }
 
 func NewRoute(handler *handlers, middleware *middlewares) *newRoute {
@@ -38,7 +39,7 @@ func (r *newRoute) InitRoute() *gin.Engine {
 	c := gin.Default()
 
 	api := c.Group("/api")
-	api.Use(r.middleware.csrf.CsrfMiddleware())
+	api.Use(r.middleware.cors.CorsMiddleware(), r.middleware.csrf.CsrfMiddleware())
 
 	v1 := api.Group("/v1")
 	v1.GET("/csrf-token", r.handler.csrfHandler.GenerateCSRFToken)

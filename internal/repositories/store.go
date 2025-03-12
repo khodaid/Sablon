@@ -7,6 +7,7 @@ import (
 
 type StoreRepository interface {
 	Save(models.Store) (models.Store, error)
+	FindAllWithOutSoftDelete() ([]models.Store, error)
 }
 
 type storeRepository struct {
@@ -25,4 +26,15 @@ func (r *storeRepository) Save(store models.Store) (models.Store, error) {
 	}
 
 	return store, nil
+}
+
+func (r *storeRepository) FindAllWithOutSoftDelete() ([]models.Store, error) {
+	var stores []models.Store
+	err := r.db.Find(&stores).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return stores, nil
 }
