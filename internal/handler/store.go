@@ -146,3 +146,44 @@ func (h *storeHandler) StoreRegister(c *gin.Context) {
 	response := helpers.APIResponse("Success create new store", http.StatusCreated, "success", dto.FormatStoreRegister(helpers.GetFullBaseURL(c, "/api/v1"), store))
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *storeHandler) GetAllStoreWithOutSoftDelete(c *gin.Context) {
+	stores, err := h.service.GetAllStoreWithOutSoftDelete()
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"message": errors}
+		respone := helpers.APIResponse("error get all store", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, respone)
+		return
+	}
+
+	respone := helpers.APIResponse("success get data all store", http.StatusOK, "success", stores)
+	c.JSON(http.StatusOK, respone)
+}
+
+func (h *storeHandler) UpdateStore(c *gin.Context) {
+	var input validation.UpdateStoreInput
+
+	err := c.ShouldBind(input)
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"message": errors}
+		respone := helpers.APIResponse("failed binding input", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, respone)
+		return
+	}
+	storeId := c.Param("id")
+
+	result, err := h.service.UpdateStore(storeId, input)
+
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"message": errors}
+		respone := helpers.APIResponse("failed update store", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, respone)
+		return
+	}
+
+	respone := helpers.APIResponse("success updated store", http.StatusOK, "success", result)
+	c.JSON(http.StatusOK, respone)
+}
