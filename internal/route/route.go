@@ -57,11 +57,15 @@ func (r *newRoute) InitRoute() *gin.Engine {
 
 	store := v1.Group("/store")
 	store.Use(r.middleware.auth.AuthMiddleware())
+	{
+		store.GET("/")
+	}
 
 	storeUsers := store.Group("/users")
 	{
 		storeUsers.GET("/", r.handler.userHandler.GetUsersStore)
 		storeUsers.GET("/:id", r.handler.userHandler.GetUserById)
+		storeUsers.POST("create-employee", r.handler.userHandler.CreateUserEmployeeStore)
 		storeUsers.PUT("/update/:id", r.handler.userHandler.UpdateUserStore)
 		storeUsers.DELETE("/soft-delete/:id", r.handler.userHandler.SoftDeleteUser)
 

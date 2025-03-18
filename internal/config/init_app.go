@@ -111,9 +111,11 @@ func Run() {
 		csrfHandler := handler.NewCsrfHandler(csrfService)
 
 		roleRepository := repositories.NewRoleRepository(g.db)
+		userRoleAdminRepository := repositories.NewUserRoleAdminRepository(g.db)
+		userStoreRepository := repositories.NewUserStoreRepository(g.db)
 
 		userRepository := repositories.NewUserRepository(g.db)
-		userService := service.NewUserService(userRepository, roleRepository)
+		userService := service.NewUserService(g.db, userRepository, roleRepository, userStoreRepository, userRoleAdminRepository)
 		userHandler := handler.NewUserHandler(userService, jwtService)
 
 		supplierRepository := repositories.NewSupplierRepository(g.db)

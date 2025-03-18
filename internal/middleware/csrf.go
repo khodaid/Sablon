@@ -23,7 +23,8 @@ func NewCSRFMiddleware(csrf jwt.CsrfService) *csrfService {
 func (c *csrfService) CsrfMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if ctx.Request.Method == "POST" || ctx.Request.Method == "PUT" || ctx.Request.Method == "DELETE" {
-			csrfToken := ctx.PostForm("_csrf")
+			// csrfToken := ctx.PostForm("_csrf")
+			csrfToken := ctx.GetHeader("X-CSRF-Token")
 			if csrfToken == "" {
 				respone := helpers.APIResponse("token csrf not found", http.StatusBadRequest, "error", csrfToken)
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, respone)

@@ -1,11 +1,14 @@
 package repositories
 
 import (
+	"log"
+
 	"github.com/khodaid/Sablon/internal/models"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
+	WithTrx(trxHandle *gorm.DB) *repository
 	FindByEmail(string) (models.User, error)
 	Save(models.User) (models.User, error)
 	FindAll() ([]models.User, error)
@@ -26,10 +29,19 @@ func NewUserRepository(db *gorm.DB) *repository {
 	return &repository{db}
 }
 
+func (r *repository) WithTrx(trxHandle *gorm.DB) *repository {
+	if trxHandle == nil {
+		log.Print("Transaction Database not found")
+		return r
+	}
+	r.db = trxHandle
+	return r
+}
+
 func (r *repository) FindByEmail(email string) (models.User, error) {
 	var user models.User
 
-	err := r.db.Where("email = ? ", email).Preload("UserRoleAdmin.Role").Preload("UserStore.Store").Find(&user).Error
+	err := r.db.Where("email = ? ", email).Preload("UserRoleAdmin.Supplier").Preload("UserRoleAdmin.Role").Preload("UserStore.Store").Find(&user).Error
 
 	if err != nil {
 		return user, err
@@ -62,7 +74,7 @@ func (r *repository) Save(user models.User) (models.User, error) {
 func (r *repository) FindById(id string) (models.User, error) {
 	var user models.User
 
-	err := r.db.Where("id", id).Preload("UserRoleAdmin.Role").First(&user).Error
+	err := r.db.Where("id", id).Preload("UserRoleAdmin.Role").Preload("UserStore").First(&user).Error
 
 	if err != nil {
 		return user, err

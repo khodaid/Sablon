@@ -21,12 +21,28 @@ type allUserStoreFormatter struct {
 }
 
 func FormatDetailUserLogin(host string, user models.User) loginDetailFormatter {
-	data := loginDetailFormatter{
-		Name:         user.Name,
-		Email:        user.Email,
-		IsBackoffice: user.UserRoleAdmin.IsBackoffice,
-		Role:         user.UserRoleAdmin.Role.Name,
-		LogoUrl:      helpers.UrlLogo(host, user.UserStore.Store.LogoFileName),
+	// data := loginDetailFormatter{
+	// 	Name:         user.Name,
+	// 	Email:        user.Email,
+	// 	IsBackoffice: user.UserRoleAdmin.IsBackoffice,
+	// 	Role:         user.UserRoleAdmin.Role.Name,
+	// 	LogoUrl:      helpers.UrlLogo(host, user.UserStore.Store.LogoFileName),
+	// }
+
+	data := loginDetailFormatter{}
+	data.Name = user.Name
+	data.Email = user.Email
+	data.IsBackoffice = user.UserRoleAdmin.IsBackoffice
+	data.Role = user.UserRoleAdmin.Role.Name
+	if !user.UserRoleAdmin.IsBackoffice {
+		data.LogoUrl = helpers.UrlLogo(host, user.UserStore.Store.LogoFileName)
+	} else {
+		switch user.UserRoleAdmin.Role.ForLogin {
+		case "supplier":
+			data.LogoUrl = helpers.UrlLogo(host, user.UserRoleAdmin.Supplier.LogoFileName)
+		case "backoffice":
+			data.LogoUrl = ""
+		}
 	}
 	return data
 }

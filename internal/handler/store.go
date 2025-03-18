@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/khodaid/Sablon/internal/dto"
+	"github.com/khodaid/Sablon/internal/models"
 	"github.com/khodaid/Sablon/internal/service"
 	"github.com/khodaid/Sablon/internal/validation"
 	"github.com/khodaid/Sablon/pkg/helpers"
@@ -185,5 +187,106 @@ func (h *storeHandler) UpdateStore(c *gin.Context) {
 	}
 
 	respone := helpers.APIResponse("success updated store", http.StatusOK, "success", result)
+	c.JSON(http.StatusOK, respone)
+}
+
+func (h *storeHandler) UpdateLogo(c *gin.Context) {
+	var input validation.UpdateLogoStoreInput
+	wg := sync.WaitGroup{}
+	store := models.Store{}
+
+	go func() {
+		wg.Add(1)
+		storeId := c.Param("id")
+		var err error
+		store, err = h.service.GetStore(storeId)
+		if err != nil {
+			errors := helpers.FormatValidationError(err)
+			errorMessage := gin.H{"message": errors}
+			respone := helpers.APIResponse("failed get store", http.StatusBadRequest, "error", errorMessage)
+			c.AbortWithStatusJSON(http.StatusBadRequest, respone)
+			return
+		}
+		wg.Done()
+	}()
+
+	if err := c.ShouldBind(&input); err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"message": errors}
+		respone := helpers.APIResponse("failed binding input", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, respone)
+		return
+	}
+
+	file, err := c.FormFile("logo")
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helpers.APIResponse("Logo is required", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// checking size limit file upload
+	fileLimit := helpers.MaxFileSizeMB(2, int(file.Size))
+	if fileLimit != nil {
+		errorMessage := gin.H{"errors": fileLimit}
+		response := helpers.APIResponse("File more than limit", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	// checking ext logo upload
+	fileExt := filepath.Ext(file.Filename)
+	extNotAllowed := helpers.ValidationLogoExtensions(fileExt)
+	if extNotAllowed != nil {
+		errorMessage := gin.H{"errors": extNotAllowed}
+		response := helpers.APIResponse("Invalid logo file type", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	// storeId := c.Param("id")
+
+	// store, err := h.service.GetStore(storeId)
+	// if err != nil {
+	// 	errors := helpers.FormatValidationError(err)
+	// 	errorMessage := gin.H{"message": errors}
+	// 	respone := helpers.APIResponse("failed get store", http.StatusBadRequest, "error", errorMessage)
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, respone)
+	// 	return
+	// }
+
+	wg.Wait()
+
+	h.db.Begin()
+	filePath := helpers.GetOldLogo(store.LogoFileName)
+
+	newFileName := fmt.Sprintf("%s%s", helpers.GenerateRandomString(16), fileExt)
+	store.LogoFileName = newFileName
+
+	result, err := h.service.UpdateLogoStore(store.ID, newFileName)
+
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"message": errors}
+		respone := helpers.APIResponse("failed update logo store", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, respone)
+		return
+	}
+
+	err = helpers.RemoveOldFile(filePath)
+	if err != nil {
+		h.db.Rollback()
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"message": errors}
+		respone := helpers.APIResponse("failed remove file", http.StatusBadRequest, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, respone)
+		return
+	}
+
+	h.db.Commit()
+	respone := helpers.APIResponse("success updated logo store", http.StatusOK, "success", result)
 	c.JSON(http.StatusOK, respone)
 }

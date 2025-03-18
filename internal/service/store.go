@@ -11,7 +11,7 @@ type StoreService interface {
 	GetStore(string) (models.Store, error)
 	GetAllStoreWithOutSoftDelete() ([]models.Store, error)
 	UpdateStore(string, validation.UpdateStoreInput) (models.Store, error)
-	UpdateLogoStore(string, string) (models.Store, error)
+	UpdateLogoStore(storeId string, newFileName string) (models.Store, error)
 	SoftDeleteStore(string) (models.Store, error)
 }
 

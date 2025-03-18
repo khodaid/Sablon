@@ -3,6 +3,7 @@ package helpers
 import (
 	"errors"
 	"fmt"
+	"os"
 )
 
 // Maksimal Ukuran File Upload
@@ -24,6 +25,17 @@ func ValidationLogoExtensions(ext string) error {
 	}
 	if _, ok := allowedExtensions[ext]; !ok {
 		return errors.New("invalid logo file type")
+	}
+	return nil
+}
+
+func GetOldLogo(filename string) string {
+	return fmt.Sprintf("./storage/logos/%s", filename)
+}
+
+func RemoveOldFile(filePath string) error {
+	if _, err := os.Stat(filePath); err == nil {
+		return os.Remove(filePath)
 	}
 	return nil
 }

@@ -14,6 +14,7 @@ import (
 type UserHandler interface {
 	Login(c *gin.Context)
 	RegisterUserRoot(c *gin.Context)
+	CreateUserEmployeeStore(c *gin.Context)
 	GetUserById(c *gin.Context)
 	UpdateUserStore(c *gin.Context)
 	SoftDeleteUser(c *gin.Context)
@@ -106,6 +107,46 @@ func (h *userHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, respone)
 }
 
+func (h *userHandler) CreateUserEmployeeStore(c *gin.Context) {
+	var input validation.CreateUserEmployeeStore
+
+	if err := c.ShouldBind(&input); err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"message": errors}
+		respone := helpers.APIResponse("error binding json", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, respone)
+		return
+	}
+
+	tokenAuth := helpers.GetHeaderToken(c)
+
+	if tokenAuth == "" {
+		respone := helpers.APIResponse("Failed get users store", http.StatusUnauthorized, "error", "")
+		c.AbortWithStatusJSON(http.StatusUnauthorized, respone)
+	}
+	decodeToken, err := jwt.DecodeJWT(tokenAuth)
+
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorsMessage := gin.H{"error": errors}
+		respone := helpers.APIResponse("Failed", http.StatusBadRequest, "error", errorsMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, respone)
+		return
+	}
+
+	user, err := h.userService.CreateEmployeeStoreByUserRootStore(input, decodeToken["user_id"].(string))
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorsMessage := gin.H{"error": errors}
+		respone := helpers.APIResponse("failed create employee", http.StatusBadRequest, "error", errorsMessage)
+		c.AbortWithStatusJSON(http.StatusBadRequest, respone)
+		return
+	}
+
+	respone := helpers.APIResponse("success create new employee", http.StatusOK, "success", user)
+	c.JSON(http.StatusOK, respone)
+}
+
 func (h *userHandler) GetUserById(c *gin.Context) {
 	userId := c.Param("id")
 	user, err := h.userService.GetUserById(userId)
@@ -126,7 +167,7 @@ func (h *userHandler) GetUserById(c *gin.Context) {
 func (h *userHandler) UpdateUserStore(c *gin.Context) {
 	var input validation.UpdateUserStore
 
-	err := c.ShouldBind(input)
+	err := c.ShouldBind(&input)
 
 	if err != nil {
 		errors := helpers.FormatValidationError(err)

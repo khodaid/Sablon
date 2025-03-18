@@ -29,7 +29,7 @@ func (csrf *csrfHandler) GenerateCSRFToken(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, respone)
 		return
 	}
-	c.Header("_csrf", token)
+	c.Header("X-CSRF-Token", token)
 	respone := helpers.APIResponse("success get csrf token", http.StatusOK, "success", "")
 	c.JSON(http.StatusOK, respone)
 }
